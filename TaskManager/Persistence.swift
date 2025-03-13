@@ -8,49 +8,44 @@
 import CoreData
 
 struct PersistenceController {
-    static let shared = PersistenceController()
+    static let shared = PersistenceController() // Singleton instance
 
-    static var preview: PersistenceController = {
-        let result = PersistenceController(inMemory: true)
-        let viewContext = result.container.viewContext
-        for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-        }
-        do {
-            try viewContext.save()
-        } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-        }
-        return result
-    }()
-
-    let container: NSPersistentContainer
+    let container: NSPersistentContainer // Persistent container
 
     init(inMemory: Bool = false) {
-        container = NSPersistentContainer(name: "TaskManager")
+        container = NSPersistentContainer(name: "TaskManager") // Initialize with the model name
         if inMemory {
-            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null") // Use in-memory store for testing
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+                fatalError("Unresolved error \(error), \(error.userInfo)") // Handle errors during store loading
             }
         })
-        container.viewContext.automaticallyMergesChangesFromParent = true
     }
+
+// Preview instance for SwiftUI previews
+    static var preview: PersistenceController = {
+        let result = PersistenceController(inMemory: true) // Use in-memory store for previews
+        let viewContext = result.container.viewContext
+
+        // Add sample data for previews
+        for i in 0..<10 {
+            let newTask = Task(context: viewContext)
+            newTask.title = "Task \(i)"
+            newTask.taskDescription = "This is a sample task."
+            newTask.priority = i % 2 == 0 ? "Low" : "High"
+            newTask.dueDate = Date()
+            newTask.isCompleted = false
+        }
+
+        do {
+            try viewContext.save() // Save the sample data
+        } catch {
+            let nsError = error as NSError
+            fatalError("Unresolved error \(nsError), \(nsError.userInfo)") // Handle errors during save
+        }
+
+        return result
+    }()
 }

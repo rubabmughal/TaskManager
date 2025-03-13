@@ -9,12 +9,12 @@ import SwiftUI
 
 @main
 struct TaskManagerApp: App {
-    let persistenceController = PersistenceController.shared
+    let persistenceController = PersistenceController.shared // Shared instance of PersistenceController
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            TaskListView(context: persistenceController.container.viewContext) // Main view with context
+                .environment(\.managedObjectContext, persistenceController.container.viewContext) // Provide context to the environment
         }
     }
 }
